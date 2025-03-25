@@ -1,0 +1,36 @@
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+venv/
+.env/
+*.venv
+
+# Ignore logs and temporary files
+*.log
+*.out
+*.tmp
+.DS_Store
+
+# Ignore IDE/editor-specific files
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+cursor/
+
+# Ignore dataset files (optional)
+data/
+data/kitti/training/velodyne/*.bin  # If you only process one file at a time, ignore bulk data
+
+# Ignore model weights (optional, unless you want to track them)
+pointPillar_model/*.pth
+
+# Ignore dependency-related files
+pip-log.txt
+pip-delete-this-directory.txt
+
+output/

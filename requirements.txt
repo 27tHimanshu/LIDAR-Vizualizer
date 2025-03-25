@@ -1,0 +1,7 @@
+torch>=1.9.0
+numpy>=1.19.2
+open3d>=0.13.0
+matplotlib>=3.3.4
+scipy>=1.7.0
+tqdm>=4.62.3
+numba>=0.53.1 
