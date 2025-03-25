@@ -3,6 +3,7 @@ import torch
 from lidar_loader import load_lidar_file, preprocess_pointcloud, create_pillars
 from model_inference import PointPillarsNet
 from visualizer import LidarVisualizer
+from traffic_analyzer import TrafficAnalyzer
 import os
 
 def main():
@@ -66,6 +67,13 @@ def main():
             print(f"Object {i+1}: {class_names[label]} (confidence: {score:.2f})")
             print(f"Box: center=({box[0]:.2f}, {box[1]:.2f}, {box[2]:.2f}), "
                   f"dims=({box[3]:.2f}, {box[4]:.2f}, {box[5]:.2f}), rot={box[6]:.2f}")
+        
+        # 8. NEW: Traffic Analysis
+        print("\nGenerating Traffic Analysis...")
+        analyzer = TrafficAnalyzer()
+        analysis = analyzer.analyze_traffic(boxes, scores, labels)
+        report = analyzer.generate_report(analysis)
+        print("\n" + report)
         
         input("\nPress Enter to close visualization...")
         visualizer.close()

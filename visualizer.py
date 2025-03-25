@@ -7,15 +7,29 @@ class LidarVisualizer:
         self.vis = o3d.visualization.Visualizer()
         self.vis.create_window()
         
-        # Set rendering options for better visualization
+        # Set rendering options for better performance
         opt = self.vis.get_render_option()
-        opt.point_size = 2
+        opt.point_size = 1  # Smaller point size for better performance
         opt.background_color = np.asarray([0, 0, 0])
+        opt.point_show_normal = False
+        opt.light_on = False  # Disable lighting for better performance
         
+        # Set view control for smoother interaction
+        view_control = self.vis.get_view_control()
+        view_control.set_zoom(0.3)  # Set initial zoom
+        view_control.set_lookat([0, 0, 0])  # Look at center
+        view_control.set_front([0.5, -0.5, 0.5])  # Set camera angle
+        view_control.set_up([0, 0, 1])  # Set up direction
+
     def create_point_cloud(self, points):
         """
         Create Open3D point cloud object from numpy array.
         """
+        # Downsample points for better performance
+        if len(points) > 20000:  # If more than 20k points
+            skip = len(points) // 20000  # Calculate skip rate
+            points = points[::skip]  # Take every nth point
+            
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(points[:, :3])
         
@@ -32,7 +46,7 @@ class LidarVisualizer:
         box: [x, y, z, l, w, h, theta]
         """
         center = box[:3]
-        dimensions = box[3:6]
+        dimensions = np.abs(box[3:6])  # Take absolute values of dimensions
         rotation = box[6]
         
         # Create box corners
@@ -53,7 +67,7 @@ class LidarVisualizer:
         # Translate box
         box_points = box_points + center
         
-        # Create line set
+        # Create line set with thicker lines for better visibility
         lines = [[0, 1], [0, 2], [1, 3], [2, 3],
                 [4, 5], [4, 6], [5, 7], [6, 7],
                 [0, 4], [1, 5], [2, 6], [3, 7]]
@@ -61,6 +75,7 @@ class LidarVisualizer:
         line_set = o3d.geometry.LineSet()
         line_set.points = o3d.utility.Vector3dVector(box_points)
         line_set.lines = o3d.utility.Vector2iVector(lines)
+        # Make lines more visible
         line_set.colors = o3d.utility.Vector3dVector([color for _ in range(len(lines))])
         
         return line_set
