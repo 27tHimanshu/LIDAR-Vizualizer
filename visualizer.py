@@ -25,11 +25,11 @@ class LidarVisualizer:
 
     def create_point_cloud(self, points):
         """
-        Create Open3D point cloud object from numpy array with aggressive downsampling.
+        Create Open3D point cloud object from numpy array with moderate downsampling.
         """
-        # More aggressive downsampling for CPU rendering
-        if len(points) > 10000:  # Reduced from 20000 to 10000
-            skip = len(points) // 10000
+        # Less aggressive downsampling - show more points
+        if len(points) > 30000:  # Increased from 10000 to 30000
+            skip = len(points) // 30000
             points = points[::skip]
             
         pcd = o3d.geometry.PointCloud()
