@@ -5,37 +5,39 @@ import os
 class LidarVisualizer:
     def __init__(self):
         self.vis = o3d.visualization.Visualizer()
-        self.vis.create_window()
+        self.vis.create_window(width=800, height=600, visible=True)  # Smaller window size
         
-        # Set rendering options for better performance
+        # Set rendering options for better CPU performance
         opt = self.vis.get_render_option()
-        opt.point_size = 1  # Smaller point size for better performance
+        opt.point_size = 2  # Slightly larger points for better visibility with fewer points
         opt.background_color = np.asarray([0, 0, 0])
         opt.point_show_normal = False
-        opt.light_on = False  # Disable lighting for better performance
+        opt.light_on = False  # Disable lighting
+        opt.mesh_show_wireframe = True  # Show wireframe for better performance
+        opt.mesh_show_back_face = False  # Don't render back faces
         
         # Set view control for smoother interaction
         view_control = self.vis.get_view_control()
-        view_control.set_zoom(0.3)  # Set initial zoom
-        view_control.set_lookat([0, 0, 0])  # Look at center
-        view_control.set_front([0.5, -0.5, 0.5])  # Set camera angle
-        view_control.set_up([0, 0, 1])  # Set up direction
+        view_control.set_zoom(0.3)
+        view_control.set_lookat([0, 0, 0])
+        view_control.set_front([0.5, -0.5, 0.5])
+        view_control.set_up([0, 0, 1])
 
     def create_point_cloud(self, points):
         """
-        Create Open3D point cloud object from numpy array.
+        Create Open3D point cloud object from numpy array with aggressive downsampling.
         """
-        # Downsample points for better performance
-        if len(points) > 20000:  # If more than 20k points
-            skip = len(points) // 20000  # Calculate skip rate
-            points = points[::skip]  # Take every nth point
+        # More aggressive downsampling for CPU rendering
+        if len(points) > 10000:  # Reduced from 20000 to 10000
+            skip = len(points) // 10000
+            points = points[::skip]
             
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(points[:, :3])
         
-        # Color points based on intensity
+        # Simplified coloring
         colors = np.zeros((len(points), 3))
-        colors[:, 0] = points[:, 3]  # Use intensity for red channel
+        colors[:, 0] = np.clip(points[:, 3], 0, 1)  # Normalize intensity to [0,1]
         pcd.colors = o3d.utility.Vector3dVector(colors)
         
         return pcd
@@ -121,9 +123,13 @@ class LidarVisualizer:
                 bbox = self.create_bbox(box, color)
                 self.vis.add_geometry(bbox)
         
-        # Update visualization
-        self.vis.poll_events()
-        self.vis.update_renderer()
+        print("\nVisualization window is open. Close the window to continue...")
+        
+        # Keep updating until window is closed
+        while True:
+            if not self.vis.poll_events():
+                break
+            self.vis.update_renderer()
     
     def close(self):
         """

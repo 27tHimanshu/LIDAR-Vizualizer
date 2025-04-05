@@ -41,9 +41,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="3D Object Detection from LiDAR")
-    parser.add_argument("--lidar_file", type=str, required=True,
+    parser.add_argument("--lidar_file", type=str, 
+                        default="data/kitti/testing/velodyne/004369.bin",
                         help="Path to KITTI format .bin file")
-    parser.add_argument("--model_path", type=str, required=True,
+    parser.add_argument("--model_path", type=str,
+                        default="pointPillar_model/pointpillar_7728.pth",
                         help="Path to pretrained PointPillars model")
     parser.add_argument("--score_threshold", type=float, default=0.5,
                         help="Confidence score threshold for filtering detections")
