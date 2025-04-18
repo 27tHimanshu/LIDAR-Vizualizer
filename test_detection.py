@@ -14,7 +14,7 @@ def main():
         analyzer = TrafficAnalyzer()
         
         # Load LiDAR file
-        lidar_file = "data/kitti/testing/velodyne/004369.bin"
+        lidar_file = "data/kitti/training/velodyne/000002.bin"
         if not os.path.exists(lidar_file):
             print(f"Error: LiDAR file {lidar_file} not found!")
             return
