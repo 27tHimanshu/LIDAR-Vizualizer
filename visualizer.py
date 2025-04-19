@@ -41,7 +41,7 @@ class LidarVisualizer:
         pcd.colors = o3d.utility.Vector3dVector(colors)
         
         return pcd
-    
+
     def create_bbox(self, box, color=(1, 0, 0)):
         """
         Create a bounding box line set from box parameters.
@@ -50,6 +50,9 @@ class LidarVisualizer:
         center = box[:3]
         dimensions = np.abs(box[3:6])  # Take absolute values of dimensions
         rotation = box[6]
+        
+        # Adjust Z-coordinate to move the box to the ground
+        center[2] -= dimensions[2] / 2  # Move it down by half the height (box[5] is height)
         
         # Create box corners
         dx, dy, dz = dimensions[0]/2, dimensions[1]/2, dimensions[2]/2
@@ -71,8 +74,8 @@ class LidarVisualizer:
         
         # Create line set with thicker lines for better visibility
         lines = [[0, 1], [0, 2], [1, 3], [2, 3],
-                [4, 5], [4, 6], [5, 7], [6, 7],
-                [0, 4], [1, 5], [2, 6], [3, 7]]
+                 [4, 5], [4, 6], [5, 7], [6, 7],
+                 [0, 4], [1, 5], [2, 6], [3, 7]]
         
         line_set = o3d.geometry.LineSet()
         line_set.points = o3d.utility.Vector3dVector(box_points)
@@ -81,7 +84,7 @@ class LidarVisualizer:
         line_set.colors = o3d.utility.Vector3dVector([color for _ in range(len(lines))])
         
         return line_set
-    
+
     def save_point_cloud(self, pcd, filename="point_cloud.ply"):
         """
         Save point cloud to PLY file
@@ -94,7 +97,7 @@ class LidarVisualizer:
         o3d.io.write_point_cloud(save_path, pcd)
         print(f"Point cloud saved to: {save_path}")
         return save_path
-    
+
     def visualize(self, points, boxes=None, scores=None, labels=None, save=True, filename="point_cloud.ply"):
         """
         Visualize point cloud and detection results.
@@ -113,13 +116,24 @@ class LidarVisualizer:
         # Add detection boxes
         if boxes is not None:
             for i, box in enumerate(boxes):
-                color = (1, 0, 0)  # Red for cars
-                if labels is not None:
-                    if labels[i] == 1:  # Pedestrian
-                        color = (0, 1, 0)  # Green
-                    elif labels[i] == 2:  # Cyclist
-                        color = (0, 0, 1)  # Blue
+                # Default color: red for cars
+                color = (1, 0, 0)
                 
+                # Check for specific object class
+                if labels is not None:
+                    label = int(labels[i]) if not isinstance(labels[i], int) else labels[i]
+                    print(f"Casted Label[{i}]: {label}")
+
+                    if label == 1:  # Pedestrian
+                        print("Color: GREEN")
+                        color = (0, 1, 0)
+                    elif label == 2:  # Cyclist
+                        print("Color: BLUE")
+                        color = (0, 0, 1)
+                    else:
+                        print("Color: RED")
+                        color = (1, 0, 0)
+                # Create and add bounding box
                 bbox = self.create_bbox(box, color)
                 self.vis.add_geometry(bbox)
         
@@ -130,9 +144,9 @@ class LidarVisualizer:
             if not self.vis.poll_events():
                 break
             self.vis.update_renderer()
-    
+
     def close(self):
         """
         Close the visualization window.
         """
-        self.vis.destroy_window() 
+        self.vis.destroy_window()
